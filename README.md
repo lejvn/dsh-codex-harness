@@ -1,11 +1,22 @@
 # dsh-codex-harness
 
-> Codex coding preset for [DeepSeek Harness (DSH)](https://www.deepseek.com/harness/) 0.2.x
+> Codex-style coding agent for [DeepSeek Harness](https://www.deepseek.com/harness/) 0.2.x — terminal, filesystem, planning, web search, and skills, all in one preset.
 
 A DSH **0.2.x** port of [`@shuind/dsh-codex-harness`](https://github.com/shuind/dsh-codex-harness)
-`0.2.x`, which targeted DSH `0.1.x`. Maintained by [lejvn](https://github.com/lejvn).
+`0.2.x`. Brings the Codex coding persona and a **full tool set** matching the built-in
+`standard` preset to DSH 0.2.x — declaratively, zero boilerplate.
 
-Provides a Codex-style agent mode with a customizable persona, system prompt, and a full tool set — terminal, file system, search, planning, compaction, web search, and skill system.
+Drop it into any profile and get a dedicated Codex mode in the Web UI mode selector:
+
+- 🖥️ **Terminal** (bash / pwsh, platform-aware)
+- 📁 **Filesystem** read/write + ripgrep search
+- 🗺️ **Plan mode** — non-mutating exploration before execution
+- 🧹 **Context compaction** — basic + tool-result pruner
+- 🌐 **Web search & fetch**
+- 🧩 **Skill system** with filesystem skill loader
+- ✅ **Goal tracking**, todo, ask-user, present
+
+All settings are **runtime-editable** from the Web UI — no restart required.
 
 ## What's new in 0.3.0
 

@@ -1,14 +1,20 @@
 {
   "name": "@lejvn/dsh-codex-harness",
   "version": "0.3.0",
-  "description": "Codex coding preset for DeepSeek Harness (DSH) 0.2.x — a port of @shuind/dsh-codex-harness 0.2.x",
+  "description": "Codex-style coding agent preset for DeepSeek Harness (DSH) 0.2.x — terminal, filesystem, planning, web search, and skills in one bundle.",
   "keywords": [
     "dsh",
     "deepseek-harness",
+    "dsh-plugin",
+    "dsh-preset",
     "codex",
     "codex-harness",
-    "agent-preset",
     "coding-agent",
+    "agent-preset",
+    "ai-coding-assistant",
+    "deepseek",
+    "llm-tools",
+    "code-interpreter",
     "dsh-0.2.x"
   ],
   "author": "lejvn (https://github.com/lejvn)",
