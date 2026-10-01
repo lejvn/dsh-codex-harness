@@ -1,0 +1,147 @@
+# dsh-codex-harness bundle patch
+# Registers the Codex agent preset and its tool set into the DSH composition.
+# This file is auto-discovered by DSH when the package is listed in
+# dsh.profile.bundles inside your profile's package.json.
+#
+# Ported from @shuind/dsh-codex-harness 0.2.x (DSH 0.1.x) to DSH 0.2.x by
+# lejvn — https://github.com/lejvn/dsh-codex-harness
+# Developed with TRAE SOLO CN. See NOTICE for attribution terms.
+
+- insert:
+    # ── Codex agent preset ──────────────────────────────────────────────
+    - id: codex-preset
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: codex
+        name: 'Codex 模式'
+        description: 'Codex 风格的编码模式，包含自定义提示词和工具集'
+        order: 50
+        plugins:
+          # Persona — Codex identity
+          - id: codex-persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: 'You are Codex, a coding agent based on the {{model}} model. Your working directory is {{cwd}}.'
+              complete: false
+
+          # Agent instructions — AGENTS.md support
+          - id: codex-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 65536
+
+          # Terminal (platform-dependent)
+          - id: codex-tool-bash
+            name: '@deepseek-ai/dsh-tool-bash'
+            disabled: !!js process.platform === 'win32'
+          - id: codex-tool-pwsh
+            name: '@deepseek-ai/dsh-tool-pwsh'
+            disabled: !!js process.platform !== 'win32'
+
+          # File system
+          - id: codex-tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+          - id: codex-tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+
+          # Background jobs
+          - id: codex-tool-jobs
+            name: '@deepseek-ai/dsh-tool-jobs'
+
+          # Goal tracking
+          - id: codex-command-goal
+            name: '@deepseek-ai/dsh-command-goal'
+          - id: codex-tool-goal
+            name: '@deepseek-ai/dsh-tool-goal'
+
+          # Planning group
+          - id: codex-planning
+            name: cordis:group
+            group: true
+            isolate:
+              planMode: true
+            config:
+              - id: codex-plan-mode
+                name: '@deepseek-ai/dsh-plan-mode'
+                config:
+                  section: |
+                    You are in plan mode. Stay in plan mode until exit_plan_mode
+                    succeeds or the user switches the session mode. Imperative
+                    language to implement changes means plan the implementation,
+                    not execute it. A user's conversational agreement — including
+                    an answer confirming something you asked — approves nothing
+                    and does not end plan mode; fold the confirmed decision into
+                    the plan and submit it through exit_plan_mode.
+
+                    Explore first. Use non-mutating reads, searches, static
+                    analysis, and checks to ground the plan in the actual
+                    repository. Do not edit or write files, change configuration,
+                    run formatters or code generation that rewrites tracked
+                    files, commit, or otherwise carry out the plan. Prefer
+                    existing functions and patterns over new machinery.
+
+                    Resolve discoverable facts by inspection. Use
+                    ask_user_question only for user-owned choices or material
+                    ambiguity that inspection cannot answer.
+
+                    Make the plan decision-complete: state the goal and success
+                    criteria; group implementation changes by subsystem;
+                    identify public API, schema, and data-flow changes; cover
+                    edge cases, failure modes, tests, acceptance criteria, and
+                    explicit assumptions.
+
+                    When ready, call exit_plan_mode with the complete plan
+                    markdown, starting with a # title.
+
+          # Compaction group
+          - id: codex-compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: codex-compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+              - id: codex-command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+              - id: codex-tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024
+
+          # User interaction
+          - id: codex-tool-ask-user
+            name: '@deepseek-ai/dsh-tool-ask-user'
+          - id: codex-tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+
+          # Web search
+          - id: codex-tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+
+          # Skill system
+          - id: codex-skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+            config:
+              customSkillDirs:
+                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('@deepseek-ai/dsh-agent-preset/package.json')), 'skills')
+          - id: codex-tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+
+          # Present
+          - id: codex-present
+            name: '@deepseek-ai/dsh-tool-present'
+
+    # ── Host-side plugin ────────────────────────────────────────────────
+    - id: dsh-codex-harness
+      name: '@lejvn/dsh-codex-harness'

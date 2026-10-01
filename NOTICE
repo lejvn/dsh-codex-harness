@@ -1,0 +1,15 @@
+dsh-codex-harness
+Copyright (c) 2026 lejvn and contributors.
+
+This product is a port of @shuind/dsh-codex-harness 0.2.x.
+
+    @shuind/dsh-codex-harness
+    Copyright (c) 2026 shuind
+    https://github.com/shuind/dsh-codex-harness
+
+The 0.2.x preset design, Codex persona text, and prompt templates originate
+with shuind. The 0.3.x line re-implements the plugin against the DeepSeek
+Harness 0.2.x architecture — the `settings` service, declarative
+`cordis.patch.yml` preset registration, and the full built-in tool set.
+
+Developed with TRAE SOLO CN.

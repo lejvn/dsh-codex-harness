@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Validate package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Syntax check
+        run: |
+          node --check lib/index.js
+          node --check lib/prompts.js
+          node --check client.js
+
+      - name: Validate package.json
+        run: node -e "JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('package.json OK')"
+
+      - name: Validate cordis.patch.yml
+        run: |
+          node -e "
+          const { readFileSync } = require('fs');
+          const YAML = require('yaml');
+          const doc = YAML.parseDocument(
+            readFileSync('cordis.patch.yml', 'utf8'),
+            { customTags: [{ tag: '!!js', resolve: (v) => ({ __js: v }) }] }
+          );
+          const errs = doc.errors ?? [];
+          if (errs.length) { errs.forEach(e => console.error(e.message)); process.exit(1); }
+          const data = doc.toJS();
+          const insert = data[0]?.insert ?? [];
+          const preset = insert.find(n => n.id === 'codex-preset');
+          if (!preset) { console.error('codex-preset node missing'); process.exit(1); }
+          const ids = preset.config.plugins.map(p => p.id);
+          const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+          if (dupes.length) { console.error('duplicate child ids: ' + dupes); process.exit(1); }
+          console.log('cordis.patch.yml OK — ' + ids.length + ' child plugins');
+          "
+        env:
+          NODE_PATH: ${{ github.workspace }}/node_modules
+
+      - name: Verify tarball contents
+        run: npm pack --dry-run
+
+      - name: Check no secrets committed
+        run: |
+          if grep -rEn 'sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{20,}|api[_-]?key\s*[:=]\s*["'"'"'][^"'"'"']{16,}' \
+            --include='*.js' --include='*.json' --include='*.yml' --include='*.md' .; then
+            echo "Potential secret detected"; exit 1
+          fi
+          echo "No secrets detected"
